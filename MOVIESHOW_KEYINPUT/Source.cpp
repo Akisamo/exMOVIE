@@ -17,7 +17,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 #define		BGMAIN	RGB(127,127,127)
 
 //動画数
-#define		MOVIECOUNT	2
+#define		MOVIENUM	2
 
 
 
@@ -26,15 +26,27 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 //基本方針としては，Windowsの窓周り関数をそのまま利用
 //InterationもOSに依存する
 // HINSTANCEやら HWNDやらは，とりあえずおまじないと言うことでw
-BSTR			MOVFILEPATH[MOVIECOUNT];
+BSTR			MOVFILEPATH[MOVIENUM];
 HWND			thewnd;
 int				movcount;
 SYSTEMTIME		timenow;
 FILE			*fp;
 errno_t			err;
 
+	//akisamo
+    HDC         hdc, hMdc;
+    PAINTSTRUCT ps;
+    HBITMAP     hbmp;
+
+
+	//akisamo
+	//動画再生の順番設定
+	//FILEPATHは動画ごとの通し番号、MOVIEORDERは順番を示す。
+	//MOVIEORDER[2]=7は、2番めにMOVFILEPATH[7]を再生せよということ
+	int	MOVIEORDER[MOVIENUM] = {1,0};
+
 ////インスタンス作成
-MSEXP::ShowMov	mov;//例の
+MSEXP::ShowMov	mov;//例の追加ヘッダの
 
 
 int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow){
@@ -48,8 +60,10 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	Beep(577, 100);
 	Beep(577, 100);
 	srand((unsigned)time(NULL));
-	movcount = 0;//何番目の映像か？ってことだよ
 
+	movcount = 0;//何番目のセクションか？
+
+	//akisamo
 	//変数初期化
 	MOVFILEPATH[0] = SysAllocString(L"v30.avi");
 	MOVFILEPATH[1] = SysAllocString(L"Wildlife.wmv");
@@ -60,6 +74,9 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	//MOVFILEPATH[7] = SysAllocString(L"");
 	//MOVFILEPATH[8] = SysAllocString(L"");
 	//MOVFILEPATH[9] = SysAllocString(L"");
+
+
+
 
 	//画面サイズの取得　デバッグフラグが有効の場合は，縦横半分で作る
 	dispx = GetSystemMetrics(SM_CXSCREEN);
@@ -73,8 +90,12 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	//背景塗りようのブラシの作成
 	hbrsh = CreateSolidBrush(BGMAIN);
 
+	//akisamo
 	//タイムスタンプの出力
-	err = fopen_s(&fp,"d.txt","w");
+	char filename[100];
+	sprintf_s(filename,"sec-%d_mov%d.txt",movcount,MOVIEORDER[movcount]);
+
+	err = fopen_s(&fp,filename,"w");
 	if(err == 0){//開けなかったら
 		printf("open\n");
 		}
@@ -92,7 +113,7 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	wcex.hInstance = hinst;
 	wcex.hIcon = LoadIcon(hinst, MAKEINTRESOURCE(IDI_APPLICATION));
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = hbrsh;
+	wcex.hbrBackground = hbrsh;//背景塗ってる
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = classNAME;//窓作成の際に参照されるっぽい。
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
@@ -135,9 +156,27 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 	//この中身は，OSからのCallによって「その都度」呼び出される。
 	//従って，Scopeがこの関数の中だけで終わるものは，その都度初期化される。
+
+
+
+
 	switch (uMsg){
 
 	case WM_PAINT://再描画処理
+
+/*		//akisamo
+		//背景に画像を表示したい
+        hdc= BeginPaint (hwnd, &ps);
+		hbmp = (HBITMAP)LoadImage( NULL, "graystart.bmp",IMAGE_BITMAP,0,0,LR_LOADFROMFILE|LR_CREATEDIBSECTION);
+        hMdc= CreateCompatibleDC( hdc );
+        SelectObject( hMdc, hbmp );
+        
+        BitBlt(hdc, 10, 20, 1920, 1080, hMdc, 0, 0, SRCCOPY);
+        
+        DeleteDC(hMdc);
+        DeleteObject( hbmp );
+*/
+
 		break;
 
 	case WM_TIMER:
@@ -145,6 +184,54 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 		break;
 
 	case WM_KEYDOWN:
+
+
+		//背景画像が出るかテスト
+		//うまくいかないよぉ！！！
+		if (wParam == VK_UP){
+        hdc= BeginPaint (hwnd, &ps);
+		hbmp = (HBITMAP)LoadImage( NULL, "graystart.bmp",IMAGE_BITMAP,0,0,LR_LOADFROMFILE|LR_CREATEDIBSECTION);
+		//エラー処理
+        if( hbmp==NULL ){
+            //MessageBox(hwnd, "Failed to open file", NAME, MB_OK);
+            PostMessage(hwnd, WM_DESTROY, 0, 0);
+            EndPaint(hwnd, &ps);
+            break;
+        hMdc= CreateCompatibleDC( hdc );
+        SelectObject( hMdc, hbmp );       
+	    BitBlt(hdc, 10, 20, 1920, 1080, hMdc, 0, 0, SRCCOPY);
+        DeleteDC(hMdc);
+        DeleteObject( hbmp );
+		}
+		}
+
+
+		if (wParam == VK_RIGHT){
+			//akisamo
+			//右キーが押されたら,ORDERを一つ送る(途中から始める場合)
+			movcount++;
+			if (movcount > (MOVIENUM-1)) movcount = 0;
+		}
+
+/*		if (wParam == VK_RETURN ){
+			//ひとつ動画が終了したらこれを押し、(または自動検出)
+			//記録用のFileを閉じて、更にここで開く。
+			//できるだけ再生周りで余計な負荷をかけないように！
+				fclose(fp);
+				char filename[100];
+				sprintf(filename,"$d.txt",MOVIEORDER[movcount]);
+				err = fopen_s(&fp,filename,"w");
+				if(err == 0){//開けなかったら
+				printf("open\n");
+				}
+				else{
+				printf("error\n");
+				return 1;	
+				}
+
+		}
+*/
+
 		if (wParam == VK_ESCAPE){
 			//ESCキーが押されたら，終了。
 			fclose(fp);
@@ -155,20 +242,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 			//CTRLキーが押されたら，Movie設定＆再生開始
 			mov.SetMovieScreen();
 
-			mov.SelectFile(MOVFILEPATH[movcount]);
+			mov.SelectFile(MOVFILEPATH[( MOVIEORDER[movcount] )]);
 			
 			//キー入力の受け渡し先の指定
 			//SelectFile，もしくは Startの後ろでないとうまく動かない。
 			//ここでは，Global宣言したWindowハンドルを渡しているが，実質WndProcの引数のhwndでも同じもので，どちらを指定しても大丈夫。なはず。
 			mov.SetWindowHandle(thewnd);
 
-
+			//ここで順番が送られる
+			//動画はセット済みなので次に備える
 			movcount++;
 			
-			if (movcount > (MOVIECOUNT-1)) movcount = 0;
+			if (movcount > (MOVIENUM-1)) movcount = 0;
 			mov.StartMovie();
 					
-			//この時点の時間を把握
+			//押下時点の時間を記録する
 					GetLocalTime(&timenow);
 					//char tmpStr[100];
 					fprintf(fp,"%d\n",movcount);
