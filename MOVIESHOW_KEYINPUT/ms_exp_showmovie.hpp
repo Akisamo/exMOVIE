@@ -45,10 +45,6 @@
 //		Initial release　
 /////////////////////////////////////
 
-//ヘッダファイルって？宣言だけをまとめたもの。
-//目次みたいなもんだと思いねぇ
-//今回では、MSEXPの中で関数やクラスが呼ばれている。
-//名前空間＞クラス(変数)＞メソッド(変数) だぜ。間違えんなよ
 
 
 #ifndef MSEXP_MOV_
@@ -72,7 +68,6 @@
 namespace MSEXP{
 	class ShowMov{
 	private:
-		//この中で使う予定のある変数を宣言している。
 		//WindowHandle
 		HWND            g_hwnd, tskb, stbtn;
 		bool			isTaskBarHidden, isStartButtonHidden, isScreenSet, isFileSet;

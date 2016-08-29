@@ -9,7 +9,7 @@
 /////////////////////////////////////
 
 
-//hppで宣言した関数の中身を記述している。ヘッダとセットであらわれる
+
 #include "ms_exp_showmovie.hpp"
 
 
@@ -257,8 +257,16 @@ void MSEXP::ShowMov::SetCurrentPosition(REFTIME jumpto){
 
 REFTIME MSEXP::ShowMov::GetCurrentPosition(void){
 	//return the current position:: time from the beggening of the movie clip.
-	pMediaPosition->get_CurrentPosition(&length);
-	return this->length;
+	HRESULT rr;
+	if (this->isScreenSet){
+		rr = pMediaPosition->get_CurrentPosition(&length);
+	}
+	if (rr == S_OK){
+		return this->length;
+	}
+	else{
+		return -9999.9;
+	}
 }
 
 
@@ -270,9 +278,9 @@ bool MSEXP::ShowMov::isMoviePlaying(void){
 		isPlaying = false;
 	}
 	else{
-		if (GetMovieState() == 1){
+		/*if (GetMovieState() == 1){
 			isPlaying = false;
-		}
+		}*/
 	}
 	return isPlaying;
 }
