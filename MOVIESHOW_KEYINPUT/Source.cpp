@@ -1,4 +1,6 @@
 #include "ms_exp_showmovie.hpp"
+#include "msexp_misc.hpp"
+#include "msexp_eyetribe.hpp"
 #include <conio.h>
 #include <Windows.h>
 #include <stdio.h>
@@ -45,6 +47,7 @@ int	MOVIEORDER[MOVIENUM] = { 2,1,0 };
 
 ////インスタンス作成
 MSEXP::ShowMov	mov;//例の追加ヘッダの
+MSEXP::EYETRIBE tet;
 
 
 int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow) {
@@ -62,19 +65,24 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	movcount = 0;//何番目のセクションか？
 	st = false;//動画終了初回のみ通る処理用。再生時はTrueに戻さなければいけない
 
-			   //akisamo
-			   //変数初期化
+	//akisamo
+	//変数初期化
 	MOVFILEPATH[0] = SysAllocString(L"../mov/v30.avi");
 	MOVFILEPATH[1] = SysAllocString(L"../mov/Wildlife.wmv");
 	MOVFILEPATH[2] = SysAllocString(L"../mov/cookie.avi");
-	//MOVFILEPATH[4] = SysAllocString(L"");
-	//MOVFILEPATH[5] = SysAllocString(L"");
-	//MOVFILEPATH[6] = SysAllocString(L"");
-	//MOVFILEPATH[7] = SysAllocString(L"");
-	//MOVFILEPATH[8] = SysAllocString(L"");
-	//MOVFILEPATH[9] = SysAllocString(L"");
+		//MOVFILEPATH[4] = SysAllocString(L"");
+		//MOVFILEPATH[5] = SysAllocString(L"");
+		//MOVFILEPATH[6] = SysAllocString(L"");
+		//MOVFILEPATH[7] = SysAllocString(L"");
+		//MOVFILEPATH[8] = SysAllocString(L"");
+		//MOVFILEPATH[9] = SysAllocString(L"");
 
 
+	//EYETRIBE setup
+	//tet.StartListening("C:\\Users\\mutsumi\\Desktop\\TESTDAT");
+	tet.StartListening("TESTDAT");
+	Sleep(2000);
+	tet.Setparam_i1(0);
 
 
 	//画面サイズの取得　デバッグフラグが有効の場合は，縦横半分で作る
@@ -149,6 +157,7 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	ShowCursor(true);
 
 	UnregisterClass(classNAME, hinst);
+	tet.EndListening();
 	return (int)msg.wParam;
 }
 
@@ -180,7 +189,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				  }
 				  //akisamo
 				  //背景に画像を表示したい
-				  /*
+				  
 				  hdc= BeginPaint (hwnd, &ps);
 				  hbmp = (HBITMAP)LoadImage( NULL, "graystart.bmp",IMAGE_BITMAP,0,0,LR_LOADFROMFILE|LR_CREATEDIBSECTION);
 				  hMdc= CreateCompatibleDC( hdc );
@@ -191,11 +200,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				  DeleteDC(hMdc);
 				  DeleteObject( hbmp );
 				  EndPaint(hwnd, &ps);
-				  */
+				  
 
 		break;
 
 	case WM_TIMER:
+
+		tet.Setparam_d1(mov.GetCurrentPosition());
+
 		if (!mov.isMoviePlaying()) {
 			if (!st) {
 				mov.DisposeMovieScreen();
@@ -258,11 +270,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			//ESCキーが押されたら，終了。
 			fclose(fp);
 			mov.DisposeMovieScreen();
+			tet.Setparam_i2(-1);
+			tet.Setparam_i3(0);
 			PostQuitMessage(0);
 		}
 		if (wParam == VK_CONTROL) {
 			//CTRLキーが押されたら，Movie設定＆再生開始
 			mov.SetMovieScreen();
+
+			tet.Setparam_d3(mov.GetCurrentPosition());
 
 			mov.SelectFile(MOVFILEPATH[(MOVIEORDER[movcount])]);
 
@@ -274,9 +290,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			//ここで順番が送られる
 			//動画はセット済みなので次に備える
 			movcount++;
-
 			if (movcount > (MOVIENUM - 1)) movcount = 0;
+
+			Sleep(2000);
 			mov.StartMovie();
+			tet.Setparam_s1("mov start");
 
 			//押下時点の時間を記録する
 			GetLocalTime(&timenow);
@@ -287,6 +305,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				timenow.wMinute,
 				timenow.wSecond,
 				timenow.wMilliseconds);
+
+			std::string mid = std::to_string(movcount);
+			std::string mfn = "movie " + mid;
+			tet.Setparam_s2(mfn);
+			tet.Setparam_i2(movcount);
+
 			//stのトグル切り替え
 			st = false;
 		}
@@ -294,6 +318,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			//スペースキーが押されたら，一時停止orリスタート
 			if (mov.isReadyToPlay()) {
 				if (mov.isMoviePlaying()) {
+					tet.Setparam_s1("KEY PRESSED");
 					mov.StopMovie();
 				}
 				else {

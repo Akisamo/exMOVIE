@@ -21,9 +21,48 @@
     <ClCompile Include="Source.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\msexp_eyetribe.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\msexp_misc.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_parser.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_socket.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ms_exp_showmovie.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\msexp_eyetribe.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_parser.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_socket.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_types.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_interfaces.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_observable.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="msexp_misc.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
