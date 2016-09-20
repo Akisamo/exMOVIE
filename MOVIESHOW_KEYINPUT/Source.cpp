@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <iostream>
+#include <sstream>
+#include <string>
+using namespace std;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -37,17 +41,16 @@ errno_t			err;
 bool			flgStop;
 bool			st;
 
+std::string movname_a;
 
-
-//akisamo
 //動画再生の順番設定
 //FILEPATHは動画ごとの通し番号、MOVIEORDERは順番を示す。
 //MOVIEORDER[2]=7は、2番めにMOVFILEPATH[7]を再生せよということ
 int	MOVIEORDER[MOVIENUM] = { 2,1,0 };
 
 ////インスタンス作成
-MSEXP::ShowMov	mov;//例の追加ヘッダの
-MSEXP::EYETRIBE tet;
+MSEXP::ShowMov	mov;//例の追加ヘッダ
+MSEXP::EYETRIBE tet;//アイトライブ
 
 
 int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow) {
@@ -61,15 +64,18 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	Beep(577, 100);
 	Beep(577, 100);
 	srand((unsigned)time(NULL));
+	
+		//何番目のセクションか？
+		movcount = 0;
+		//動画終了初回のみ通る処理用フラグ。
+		//再生時はTrueに戻す。再生終了の処理が終わったらFalseに切り替える
+		st = false;
 
-	movcount = 0;//何番目のセクションか？
-	st = false;//動画終了初回のみ通る処理用。再生時はTrueに戻さなければいけない
-
-	//akisamo
-	//変数初期化
-	MOVFILEPATH[0] = SysAllocString(L"../mov/v30.avi");
-	MOVFILEPATH[1] = SysAllocString(L"../mov/Wildlife.wmv");
-	MOVFILEPATH[2] = SysAllocString(L"../mov/cookie.avi");
+		//akisamo
+		//動画ソース管理。基本的には動画追加時以外触らない
+		MOVFILEPATH[0] = SysAllocString(L"../mov/v30.avi");
+		MOVFILEPATH[1] = SysAllocString(L"../mov/Wildlife.wmv");
+		MOVFILEPATH[2] = SysAllocString(L"../mov/cookie.avi");
 		//MOVFILEPATH[4] = SysAllocString(L"");
 		//MOVFILEPATH[5] = SysAllocString(L"");
 		//MOVFILEPATH[6] = SysAllocString(L"");
@@ -79,8 +85,7 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 
 
 	//EYETRIBE setup
-	//tet.StartListening("C:\\Users\\mutsumi\\Desktop\\TESTDAT");
-	tet.StartListening("TESTDAT");
+	tet.StartListening("TEST1");
 	Sleep(2000);
 	tet.Setparam_i1(0);
 
@@ -98,7 +103,7 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	hbrsh = CreateSolidBrush(BGMAIN);
 
 	//akisamo
-	//タイムスタンプの出力
+	//タイムスタンプfileの出力
 	char filename[100];
 	sprintf_s(filename, "sec-%d_mov%d.txt", movcount, MOVIEORDER[movcount]);
 
@@ -166,7 +171,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	//従って，Scopeがこの関数の中だけで終わるものは，その都度初期化される。
 
 	//akisamo
-	HDC         hdc, hMdc;
+	HDC         hdc, hMdc, hdcBmp;
 	PAINTSTRUCT ps;
 	HBITMAP     hbmp;
 	LPTSTR		stms = TEXT("うりゃ");
@@ -174,42 +179,52 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	switch (uMsg) {
 
-
-
 	case WM_PAINT://再描画処理
-				  if (st) {
-				  Beep(750, 100);
-				  hdc = BeginPaint(hwnd, &ps);
-				  SetBkColor(hdc, RGB(128, 128, 128));
-				  SetTextColor(hdc, RGB(0, 0, 0));
-				  int lineH = 40;
-				  int Fline = 20;
-				  TextOut(hdc, 100, Fline + lineH, stms, strlen(stms));
-				  EndPaint(hwnd, &ps);
-				  }
-				  //akisamo
-				  //背景に画像を表示したい
-				  
-				  hdc= BeginPaint (hwnd, &ps);
-				  hbmp = (HBITMAP)LoadImage( NULL, "graystart.bmp",IMAGE_BITMAP,0,0,LR_LOADFROMFILE|LR_CREATEDIBSECTION);
-				  hMdc= CreateCompatibleDC( hdc );
-				  SelectObject( hMdc, hbmp );
 
-				  BitBlt(hdc, 10, 20, 1920, 1080, hMdc, 0, 0, SRCCOPY);
 
-				  DeleteDC(hMdc);
-				  DeleteObject( hbmp );
-				  EndPaint(hwnd, &ps);
-				  
+		if (st) {
+
+			//計測の終了、fileを開き直して計測スタート
+			tet.EndListening();
+			Sleep(1000);
+			//movname_a = std::to_string(movcount);
+			//tet.StartListening(movname_a);
+			//Sleep(2000);
+			//tet.Setparam_i1(0);
+
+			//画面消しと何かあれ
+			Beep(750, 100);
+			hdc = BeginPaint(hwnd, &ps);
+			SetBkColor(hdc, RGB(128, 128, 128));
+			SetTextColor(hdc, RGB(0, 0, 0));
+			int lineH = 40;
+			int Fline = 20;
+			TextOut(hdc, 100, Fline + lineH, stms, strlen(stms));
+			EndPaint(hwnd, &ps);
+
+			//akisamo
+			//背景に画像を表示したい
+			hdcBmp = BeginPaint(hwnd, &ps);
+			hbmp = (HBITMAP)LoadImage(NULL, "graystart.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+			hMdc = CreateCompatibleDC(hdcBmp);
+			SelectObject(hMdc, hbmp);
+
+			BitBlt(hdcBmp, 0, 0, 1920, 1080, hMdc, 0, 0, SRCCOPY);
+
+			DeleteDC(hMdc);
+			DeleteObject(hbmp);
+			EndPaint(hwnd, &ps);
+		}
 
 		break;
 
 	case WM_TIMER:
 
 		tet.Setparam_d1(mov.GetCurrentPosition());
-
+		//もし再生していなかったら(再生終了していたら)
+		//動画画面を閉じる処理を行う
 		if (!mov.isMoviePlaying()) {
-			if (!st) {
+			if (!st) {//一回だけ行ったら以降はDisposeしない
 				mov.DisposeMovieScreen();
 				InvalidateRect(hwnd, NULL, TRUE);
 				st = true;
@@ -220,25 +235,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_KEYDOWN:
 
 
-		//背景画像が出るかテスト
-		//うまくいかないよぉ！！！
-		if (wParam == VK_UP) {
-			hdc = BeginPaint(hwnd, &ps);
-			hbmp = (HBITMAP)LoadImage(NULL, "graystart.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-			//エラー処理
-			if (hbmp == NULL) {
-				//MessageBox(hwnd, "Failed to open file", NAME, MB_OK);
-				PostMessage(hwnd, WM_DESTROY, 0, 0);
-				EndPaint(hwnd, &ps);
-				break;
-				hMdc = CreateCompatibleDC(hdc);
-				SelectObject(hMdc, hbmp);
-				BitBlt(hdc, 10, 20, 1920, 1080, hMdc, 0, 0, SRCCOPY);
-				DeleteDC(hMdc);
-				DeleteObject(hbmp);
-			}
-		}
-
 
 		if (wParam == VK_RIGHT) {
 			//akisamo
@@ -247,29 +243,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			if (movcount > (MOVIENUM - 1)) movcount = 0;
 		}
 
-		/*		if (wParam == VK_RETURN ){
-		//ひとつ動画が終了したらこれを押し、(または自動検出)
-		//記録用のFileを閉じて、更にここで開く。
-		//できるだけ再生周りで余計な負荷をかけないように！
-		fclose(fp);
-		char filename[100];
-		sprintf(filename,"$d.txt",MOVIEORDER[movcount]);
-		err = fopen_s(&fp,filename,"w");
-		if(err == 0){//開けなかったら
-		printf("open\n");
-		}
-		else{
-		printf("error\n");
-		return 1;
-		}
 
-		}
-		*/
 
 		if (wParam == VK_ESCAPE) {
 			//ESCキーが押されたら，終了。
 			fclose(fp);
-			mov.DisposeMovieScreen();
+			if (!st) mov.DisposeMovieScreen();//falseなら画面は消えているので省略して良い
 			tet.Setparam_i2(-1);
 			tet.Setparam_i3(0);
 			PostQuitMessage(0);
@@ -282,9 +261,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			mov.SelectFile(MOVFILEPATH[(MOVIEORDER[movcount])]);
 
+			//アイトラッカの記録開始(終了は動画終了時orESC押下時)
+			movname_a = std::to_string(movcount);
+			tet.StartListening(movname_a);
+			Sleep(2000);
+			tet.Setparam_i1(0);
+
 			//キー入力の受け渡し先の指定
 			//SelectFile，もしくは Startの後ろでないとうまく動かない。
-			//ここでは，Global宣言したWindowハンドルを渡しているが，実質WndProcの引数のhwndでも同じもので，どちらを指定しても大丈夫。なはず。
+			//ここでは，Global宣言したWindowハンドルを渡しているが，
+			//実質WndProcの引数のhwndでも同じもので，どちらを指定しても大丈夫。なはず。
 			mov.SetWindowHandle(thewnd);
 
 			//ここで順番が送られる
@@ -308,12 +294,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			std::string mid = std::to_string(movcount);
 			std::string mfn = "movie " + mid;
+
 			tet.Setparam_s2(mfn);
 			tet.Setparam_i2(movcount);
 
 			//stのトグル切り替え
 			st = false;
 		}
+
+
 		if (wParam == VK_SPACE) {
 			//スペースキーが押されたら，一時停止orリスタート
 			if (mov.isReadyToPlay()) {
