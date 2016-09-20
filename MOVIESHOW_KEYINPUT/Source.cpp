@@ -42,6 +42,7 @@ bool			flgStop;
 bool			st;
 
 std::string movname_a;
+std::string exID = "test1" + std::to_string(timenow.wMinute);
 
 //動画再生の順番設定
 //FILEPATHは動画ごとの通し番号、MOVIEORDERは順番を示す。
@@ -253,6 +254,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			tet.Setparam_i3(0);
 			PostQuitMessage(0);
 		}
+
 		if (wParam == VK_CONTROL) {
 			//CTRLキーが押されたら，Movie設定＆再生開始
 			mov.SetMovieScreen();
@@ -262,7 +264,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			mov.SelectFile(MOVFILEPATH[(MOVIEORDER[movcount])]);
 
 			//アイトラッカの記録開始(終了は動画終了時orESC押下時)
-			movname_a = std::to_string(movcount);
+			movname_a = exID + "_" + std::to_string(MOVIEORDER[movcount]);
 			tet.StartListening(movname_a);
 			Sleep(2000);
 			tet.Setparam_i1(0);
@@ -273,32 +275,36 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			//実質WndProcの引数のhwndでも同じもので，どちらを指定しても大丈夫。なはず。
 			mov.SetWindowHandle(thewnd);
 
-			//ここで順番が送られる
-			//動画はセット済みなので次に備える
-			movcount++;
-			if (movcount > (MOVIENUM - 1)) movcount = 0;
 
-			Sleep(2000);
-			mov.StartMovie();
-			tet.Setparam_s1("mov start");
 
 			//押下時点の時間を記録する
 			GetLocalTime(&timenow);
 			//char tmpStr[100];
-			fprintf(fp, "%d\n", movcount);
+			fprintf(fp, "movID=%d,movcount=%d\n", MOVIEORDER[movcount],movcount);
 			fprintf(fp, "%2d:%02d:%02d.%02d\n",
 				timenow.wHour,
 				timenow.wMinute,
 				timenow.wSecond,
 				timenow.wMilliseconds);
 
-			std::string mid = std::to_string(movcount);
+			std::string mid = std::to_string(MOVIEORDER[movcount]);
 			std::string mfn = "movie " + mid;
 
 			tet.Setparam_s2(mfn);
-			tet.Setparam_i2(movcount);
+			tet.Setparam_i2(MOVIEORDER[movcount]);
 
 			//stのトグル切り替え
+
+			//ここで順番が送られる
+			//動画はセット済みなので次に備える
+			movcount++;
+			if (movcount > (MOVIENUM - 1)) movcount = 0;
+			
+			//ここで再生する！
+			Sleep(2000);
+			mov.StartMovie();
+			tet.Setparam_s1("mov start");
+
 			st = false;
 		}
 

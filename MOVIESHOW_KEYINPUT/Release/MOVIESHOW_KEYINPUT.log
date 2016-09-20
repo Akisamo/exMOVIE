@@ -1,13 +1,9 @@
-﻿2016/09/20 16:48:06 にビルドを開始しました。
+﻿2016/09/20 17:29:36 にビルドを開始しました。
      1>ノード 2 上のプロジェクト "C:\Users\Kawauchi\Documents\GitHub\exMOVIE\MOVIESHOW_KEYINPUT\MOVIESHOW_KEYINPUT.vcxproj" (Build ターゲット)。
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Release\\" /Fd"Release\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt Source.cpp
-         Source.cpp
-     1>Source.cpp(97): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
-     1>Source.cpp(98): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
-     1>Source.cpp(126): warning C4302: '型キャスト': 'LPSTR' から 'WORD' へ切り詰めます。
-     1>Source.cpp(131): warning C4302: '型キャスト': 'LPSTR' から 'WORD' へ切り詰めます。
-     1>Source.cpp(178): warning C4101: 'br': ローカル変数は 1 度も使われていません。
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Release\\" /Fd"Release\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi.cpp ..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_socket.cpp
+         gazeapi.cpp
+         gazeapi_socket.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Kawauchi\Documents\GitHub\exMOVIE\Release\MOVIESHOW_KEYINPUT.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Kawauchi\Documents\GitHub\exMOVIE\Release\MOVIESHOW_KEYINPUT.pdb" /OPT:REF /OPT:ICF /LTCG:incremental /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Kawauchi\Documents\GitHub\exMOVIE\Release\MOVIESHOW_KEYINPUT.lib" /MACHINE:X86 /SAFESEH Release\gazeapi.obj
          Release\gazeapi_parser.obj
@@ -17,13 +13,13 @@
          Release\ms_exp_showmovie.obj
          Release\Source.obj
          コード生成しています。
-         85 of 3669 functions ( 2.3%) were compiled, the rest were copied from previous compilation.
-           2 functions were new in current compilation
-           19 functions had inline decision re-evaluated but remain unchanged
+         2 of 3674 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+           0 functions were new in current compilation
+           0 functions had inline decision re-evaluated but remain unchanged
          コード生成が終了しました。
          MOVIESHOW_KEYINPUT.vcxproj -> C:\Users\Kawauchi\Documents\GitHub\exMOVIE\Release\MOVIESHOW_KEYINPUT.exe
      1>プロジェクト "C:\Users\Kawauchi\Documents\GitHub\exMOVIE\MOVIESHOW_KEYINPUT\MOVIESHOW_KEYINPUT.vcxproj" (Build ターゲット) のビルドが完了しました。
 
 ビルドに成功しました。
 
-経過時間 00:00:02.94
+経過時間 00:00:13.25
