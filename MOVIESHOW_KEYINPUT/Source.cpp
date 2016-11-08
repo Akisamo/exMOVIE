@@ -32,30 +32,36 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 //基本方針としては，Windowsの窓周り関数をそのまま利用
 //InterationもOSに依存する
 // HINSTANCEやら HWNDやらは，とりあえずおまじないと言うことでw
-BSTR			MOVFILEPATH[MOVIENUM];
+
 HWND			thewnd;
-int				movcount;
+int				movcount;//実験の現在セクション
 SYSTEMTIME		timenow;
 FILE			*fp;
 errno_t			err;
 bool			flgStop;
-bool			st;
+bool			isDispose;		//動画終了初回のみ通る処理用フラグ。再生時はTrueに戻す。再生終了の処理が終わったらFalseに切り替える
+bool			isPause;//今止まってますか！？？？？
+bool			isPlay;//いま再生してますか
+BSTR			MOVFILEPATH[MOVIENUM];//動画の場所
 
 std::string movname_a;
-std::string exID = "test1" + std::to_string(timenow.wMinute);
+std::string exID = "test1" + std::to_string(timenow.wMinute);//動画ごとの愛と落下記録ファイル命名規則
 
 //動画再生の順番設定
 //FILEPATHは動画ごとの通し番号、MOVIEORDERは順番を示す。
 //MOVIEORDER[2]=7は、2番めにMOVFILEPATH[7]を再生せよということ
-int	MOVIEORDER[MOVIENUM] = { 2,1,0 };
+int	MOVIEORDER[MOVIENUM] = { 2,1,2 };
 
 ////インスタンス作成
 MSEXP::ShowMov	mov;//例の追加ヘッダ
 MSEXP::EYETRIBE tet;//アイトライブ
 
 
+
+
+
+//ここからメイン文が走る
 int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow) {
-	//int main(void){
 	MSG			msg;
 	HBRUSH		hbrsh;
 	WNDCLASSEX	wcex;
@@ -66,23 +72,23 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	Beep(577, 100);
 	srand((unsigned)time(NULL));
 	
-		//何番目のセクションか？
-		movcount = 0;
-		//動画終了初回のみ通る処理用フラグ。
-		//再生時はTrueに戻す。再生終了の処理が終わったらFalseに切り替える
-		st = false;
-
-		//akisamo
-		//動画ソース管理。基本的には動画追加時以外触らない
-		MOVFILEPATH[0] = SysAllocString(L"../mov/v30.avi");
-		MOVFILEPATH[1] = SysAllocString(L"../mov/Wildlife.wmv");
-		MOVFILEPATH[2] = SysAllocString(L"../mov/cookie.avi");
-		//MOVFILEPATH[4] = SysAllocString(L"");
-		//MOVFILEPATH[5] = SysAllocString(L"");
-		//MOVFILEPATH[6] = SysAllocString(L"");
-		//MOVFILEPATH[7] = SysAllocString(L"");
-		//MOVFILEPATH[8] = SysAllocString(L"");
-		//MOVFILEPATH[9] = SysAllocString(L"");
+	//初期化
+	movcount = 0;
+	isDispose = false;
+	isPause = false;
+	isPlay = false;
+	//akisamo
+	//動画ソース管理。基本的には動画追加時以外触らないで、再生順はMOVIEORDERで入れ替える
+	MOVFILEPATH[0] = SysAllocString(L"../mov/v30.avi");
+	MOVFILEPATH[1] = SysAllocString(L"../mov/Wildlife.wmv");
+	MOVFILEPATH[2] = SysAllocString(L"../mov/cookie.avi");
+	//MOVFILEPATH[3] = SysAllocString(L"");
+	//MOVFILEPATH[4] = SysAllocString(L"");
+	//MOVFILEPATH[5] = SysAllocString(L"");
+	//MOVFILEPATH[6] = SysAllocString(L"");
+	//MOVFILEPATH[7] = SysAllocString(L"");
+	//MOVFILEPATH[8] = SysAllocString(L"");
+	//MOVFILEPATH[9] = SysAllocString(L"");
 
 
 	//EYETRIBE setup
@@ -91,7 +97,7 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	tet.Setparam_i1(0);
 
 
-	//画面サイズの取得　デバッグフラグが有効の場合は，縦横半分で作る
+	//画面サイズの取得　DEBUGMODEがtrueの場合は，縦横半分で作る
 	dispx = GetSystemMetrics(SM_CXSCREEN);
 	dispy = GetSystemMetrics(SM_CYSCREEN);
 	if (DEBUGMODE) {
@@ -183,7 +189,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_PAINT://再描画処理
 
 
-		if (st) {
+		if (isDispose) {
 
 			//計測の終了、fileを開き直して計測スタート
 			tet.EndListening();
@@ -200,7 +206,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			SetTextColor(hdc, RGB(0, 0, 0));
 			int lineH = 40;
 			int Fline = 20;
-			TextOut(hdc, 100, Fline + lineH, stms, strlen(stms));
+			//TextOut(hdc, 100, Fline + lineH, stms, strlen(stms));
 			EndPaint(hwnd, &ps);
 
 			//akisamo
@@ -225,10 +231,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		//もし再生していなかったら(再生終了していたら)
 		//動画画面を閉じる処理を行う
 		if (!mov.isMoviePlaying()) {
-			if (!st) {//一回だけ行ったら以降はDisposeしない
+			if (!isDispose) {//一回だけ行ったら以降はDisposeしない
 				mov.DisposeMovieScreen();
 				InvalidateRect(hwnd, NULL, TRUE);
-				st = true;
+				isDispose = true;
+				isPlay = false;
 			}
 		}
 		break;
@@ -236,27 +243,27 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_KEYDOWN:
 
 
-
+		//右キーが押されたら,ORDERを一つ送る(途中から始める場合)
 		if (wParam == VK_RIGHT) {
-			//akisamo
-			//右キーが押されたら,ORDERを一つ送る(途中から始める場合)
+
 			movcount++;
 			if (movcount > (MOVIENUM - 1)) movcount = 0;
 		}
 
 
-
+		//ESCキーが押されたら，終了。
 		if (wParam == VK_ESCAPE) {
-			//ESCキーが押されたら，終了。
+
 			fclose(fp);
-			if (!st) mov.DisposeMovieScreen();//falseなら画面は消えているので省略して良い
+			if (!isDispose) mov.DisposeMovieScreen();//falseなら画面は消えているので省略して良い
 			tet.Setparam_i2(-1);
 			tet.Setparam_i3(0);
 			PostQuitMessage(0);
 		}
 
+		//CTRLキーが押されたら，Movie設定＆再生開始
 		if (wParam == VK_CONTROL) {
-			//CTRLキーが押されたら，Movie設定＆再生開始
+
 			mov.SetMovieScreen();
 
 			tet.Setparam_d3(mov.GetCurrentPosition());
@@ -265,8 +272,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			//アイトラッカの記録開始(終了は動画終了時orESC押下時)
 			movname_a = exID + "_" + std::to_string(MOVIEORDER[movcount]);
+			//この名前で記録開始せよ
 			tet.StartListening(movname_a);
-			Sleep(2000);
 			tet.Setparam_i1(0);
 
 			//キー入力の受け渡し先の指定
@@ -293,7 +300,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			tet.Setparam_s2(mfn);
 			tet.Setparam_i2(MOVIEORDER[movcount]);
 
-			//stのトグル切り替え
+			//isDisposeのトグル切り替え
 
 			//ここで順番が送られる
 			//動画はセット済みなので次に備える
@@ -301,23 +308,26 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			if (movcount > (MOVIENUM - 1)) movcount = 0;
 			
 			//ここで再生する！
-			Sleep(2000);
+			Sleep(100);
 			mov.StartMovie();
 			tet.Setparam_s1("mov start");
 
-			st = false;
+			isDispose = false;
+			isPlay = true;
 		}
 
 
 		if (wParam == VK_SPACE) {
 			//スペースキーが押されたら，一時停止orリスタート
-			if (mov.isReadyToPlay()) {
-				if (mov.isMoviePlaying()) {
+			if (isPlay) {
+				if (!isPause) {
 					tet.Setparam_s1("KEY PRESSED");
 					mov.StopMovie();
+					isPause = true;
 				}
 				else {
 					mov.StartMovie();
+					isPause = false;
 
 				}
 			}
