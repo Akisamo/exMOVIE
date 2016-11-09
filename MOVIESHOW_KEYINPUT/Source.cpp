@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <random>
 using namespace std;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -25,6 +26,12 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 //動画数
 #define		MOVIENUM	3
 
+//遅延回数
+#define     DELAYCOUNT     5
+
+#define		DELAYTIME   500.0
+
+
 
 
 
@@ -34,15 +41,26 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 // HINSTANCEやら HWNDやらは，とりあえずおまじないと言うことでw
 
 HWND			thewnd;
-int				movcount;//実験の現在セクション
+int				movcount;		//実験動画の現在セクション
 SYSTEMTIME		timenow;
 FILE			*fp;
 errno_t			err;
 bool			flgStop;
 bool			isDispose;		//動画終了初回のみ通る処理用フラグ。再生時はTrueに戻す。再生終了の処理が終わったらFalseに切り替える
-bool			isPause;//今止まってますか！？？？？
-bool			isPlay;//いま再生してますか
+bool			isPause;		//今止まってますか！？？？？
+bool			isPlay;			//いま再生してますか
 BSTR			MOVFILEPATH[MOVIENUM];//動画の場所
+
+int unit;
+
+
+DOUBLE		delayTiming[DELAYCOUNT];
+
+
+DOUBLE		Delay[2][DELAYCOUNT+1] = {	{0.5	  ,1.0      ,1.5	  ,2.0		,2.5	  ,100.0 },
+										{DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,999.9 }};//遅延のスクリプト
+
+
 
 std::string movname_a;
 std::string exID = "test1" + std::to_string(timenow.wMinute);//動画ごとの愛と落下記録ファイル命名規則
@@ -74,10 +92,27 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	
 	//初期化
 	movcount = 0;
+	unit = 0;
 	isDispose = false;
 	isPause = false;
 	isPlay = false;
-	//akisamo
+
+
+	//Delayタイミングの作成
+	DOUBLE tempN;
+	bool flugC;
+	std::random_device rnd;
+	std::mt19937 mt(rnd());
+	std::uniform_int_distribution<int> rand29(1, 29);//乱数の範囲ここで決まってます
+	for (int i = 0; i < DELAYCOUNT; i++) {
+		flugC = true;
+		while (flugC) {
+				tempN = rand29(mt);
+				for (int t = 0; t < i; t++) { if (delayTiming[t] == tempN) flugC = false;			}
+				}
+		delayTiming[i] = flugC;
+		}
+	
 	//動画ソース管理。基本的には動画追加時以外触らないで、再生順はMOVIEORDERで入れ替える
 	MOVFILEPATH[0] = SysAllocString(L"../mov/v30.avi");
 	MOVFILEPATH[1] = SysAllocString(L"../mov/Wildlife.wmv");
@@ -89,6 +124,7 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	//MOVFILEPATH[7] = SysAllocString(L"");
 	//MOVFILEPATH[8] = SysAllocString(L"");
 	//MOVFILEPATH[9] = SysAllocString(L"");
+
 
 
 	//EYETRIBE setup
@@ -184,6 +220,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	LPTSTR		stms = TEXT("うりゃ");
 	HBRUSH		br;
 
+
 	switch (uMsg) {
 
 	case WM_PAINT://再描画処理
@@ -194,6 +231,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			//計測の終了、fileを開き直して計測スタート
 			tet.EndListening();
 			Sleep(1000);
+			unit = 0;
 			//movname_a = std::to_string(movcount);
 			//tet.StartListening(movname_a);
 			//Sleep(2000);
@@ -206,7 +244,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			SetTextColor(hdc, RGB(0, 0, 0));
 			int lineH = 40;
 			int Fline = 20;
-			//TextOut(hdc, 100, Fline + lineH, stms, strlen(stms));
+			TextOut(hdc, 100, Fline + lineH, stms, strlen(stms));
 			EndPaint(hwnd, &ps);
 
 			//akisamo
@@ -227,6 +265,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_TIMER:
 
+
 		tet.Setparam_d1(mov.GetCurrentPosition());
 		//もし再生していなかったら(再生終了していたら)
 		//動画画面を閉じる処理を行う
@@ -238,6 +277,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				isPlay = false;
 			}
 		}
+
+
+		//再生中の擬似的なDelayを行う
+		//
+		if (Delay[unit][0] < mov.GetCurrentPosition()) {
+				
+				tet.Setparam_s1("Delay");
+				mov.StopMovie();
+				Sleep(500);
+				mov.StartMovie();
+				tet.Setparam_s1("ReStart");
+				unit = unit+1;
+					}
+		
+
+
 		break;
 
 	case WM_KEYDOWN:
@@ -335,12 +390,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		break;
+
 	case WM_CREATE:
 		break;
+
 	case WM_DESTROY:
 		mov.DisposeMovieScreen();
 		PostQuitMessage(0);
 		break;
+
 	default:
 		break;
 	}
