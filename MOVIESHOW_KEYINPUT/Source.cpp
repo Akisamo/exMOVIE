@@ -112,6 +112,11 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 				}
 		delayTiming[i] = flugC;
 		}
+	sort(delayTiming,delayTiming + DELAYCOUNT)
+
+	for (i = 0; i < DELAYCOUNT; i ++){
+		delay[1][i] = delayTiming[i];
+	}
 	
 	//動画ソース管理。基本的には動画追加時以外触らないで、再生順はMOVIEORDERで入れ替える
 	MOVFILEPATH[0] = SysAllocString(L"../mov/v30.avi");
