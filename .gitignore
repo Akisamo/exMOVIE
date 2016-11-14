@@ -13,7 +13,6 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
-*.opendb
 
 # Windows shortcuts
 *.lnk
