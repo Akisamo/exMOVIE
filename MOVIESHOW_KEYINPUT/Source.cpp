@@ -10,6 +10,7 @@
 #include <sstream>
 #include <string>
 #include <random>
+#include <algorithm>
 using namespace std;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -29,7 +30,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 //’x‰„‰ñ”
 #define     DELAYCOUNT     5
 
-#define		DELAYTIME   500.0
+#define		DELAYTIME   200.0
 
 
 
@@ -52,15 +53,17 @@ bool			isPlay;			//‚¢‚ÜÄ¶‚µ‚Ä‚Ü‚·‚©
 BSTR			MOVFILEPATH[MOVIENUM];//“®‰æ‚ÌêŠ
 
 int unit;
+DOUBLE tempN;
+bool flugC;
+
+int cnt, cnt2;
 
 
-DOUBLE		delayTiming[DELAYCOUNT];
+DOUBLE		delayTiming[DELAYCOUNT] = {0,0,0,0,0};
 
 
-DOUBLE		Delay[2][DELAYCOUNT+1] = {	{0.5	  ,1.0      ,1.5	  ,2.0		,2.5	  ,100.0 },
+DOUBLE		delayProgram[2][DELAYCOUNT+1] = {	{0.5	  ,1.0      ,1.5	  ,2.0		,2.5	  ,100.0 },
 										{DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,999.9 }};//’x‰„‚ÌƒXƒNƒŠƒvƒg
-
-
 
 std::string movname_a;
 std::string exID = "test1" + std::to_string(timenow.wMinute);//“®‰æ‚²‚Æ‚Ìˆ¤‚Æ—‰º‹L˜^ƒtƒ@ƒCƒ‹–½–¼‹K‘¥
@@ -68,14 +71,38 @@ std::string exID = "test1" + std::to_string(timenow.wMinute);//“®‰æ‚²‚Æ‚Ìˆ¤‚Æ—‰
 //“®‰æÄ¶‚Ì‡”Ôİ’è
 //FILEPATH‚Í“®‰æ‚²‚Æ‚Ì’Ê‚µ”Ô†AMOVIEORDER‚Í‡”Ô‚ğ¦‚·B
 //MOVIEORDER[2]=7‚ÍA2”Ô‚ß‚ÉMOVFILEPATH[7]‚ğÄ¶‚¹‚æ‚Æ‚¢‚¤‚±‚Æ
-int	MOVIEORDER[MOVIENUM] = { 2,1,2 };
+int	MOVIEORDER[MOVIENUM] = { 1,2,0 };
 
 ////ƒCƒ“ƒXƒ^ƒ“ƒXì¬
 MSEXP::ShowMov	mov;//—á‚Ì’Ç‰Áƒwƒbƒ_
 MSEXP::EYETRIBE tet;//ƒAƒCƒgƒ‰ƒCƒu
 
 
+//—”
+std::random_device rnd;
+std::mt19937 mt(rnd());
+std::uniform_int_distribution<> rand29(1, 20);//—”‚Ì”ÍˆÍ‚±‚±‚ÅŒˆ‚Ü‚Á‚Ä‚Ü‚·
+void RandomDelay() {
 
+	for (cnt = 0; cnt < DELAYCOUNT; cnt++) {
+
+		do {
+			flugC = true;
+			tempN = rand29(mt);
+			for (int cnt2 = 0; cnt2 < cnt; cnt2++) { 
+				if (delayTiming[cnt2] == tempN) {flugC = false; } }//‚à‚µd•¡‚ª‚ ‚ê‚Î’Eo‚³‚¹‚È‚¢
+		} while (flugC == false);
+
+		delayTiming[cnt] = tempN;
+	}
+
+	sort(delayTiming, delayTiming + DELAYCOUNT);
+
+	for (int i = 0; i < DELAYCOUNT; i++) {
+		delayProgram[0][i] = delayTiming[i]/2;
+	}
+	
+}
 
 
 //‚±‚±‚©‚çƒƒCƒ“•¶‚ª‘–‚é
@@ -93,33 +120,18 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	//‰Šú‰»
 	movcount = 0;
 	unit = 0;
-	isDispose = false;
+	isDispose = true;
 	isPause = false;
 	isPlay = false;
 
-
-	//Delayƒ^ƒCƒ~ƒ“ƒO‚Ìì¬
-	DOUBLE tempN;
-	bool flugC;
-	std::random_device rnd;
-	std::mt19937 mt(rnd());
-	std::uniform_int_distribution<int> rand29(1, 29);//—”‚Ì”ÍˆÍ‚±‚±‚ÅŒˆ‚Ü‚Á‚Ä‚Ü‚·
-	for (int i = 0; i < DELAYCOUNT; i++) {
-		flugC = true;
-		while (flugC) {
-				tempN = rand29(mt);
-				for (int t = 0; t < i; t++) { if (delayTiming[t] == tempN) flugC = false;			}
-				}
-		delayTiming[i] = flugC;
-		}
-	sort(delayTiming,delayTiming + DELAYCOUNT)
-
-	for (i = 0; i < DELAYCOUNT; i ++){
-		delay[1][i] = delayTiming[i];
-	}
 	
+	//ƒ‰ƒ“ƒ_ƒ€
+	//Delayƒ^ƒCƒ~ƒ“ƒO‚Ìì¬
+
+	RandomDelay();
+
 	//“®‰æƒ\[ƒXŠÇ—BŠî–{“I‚É‚Í“®‰æ’Ç‰ÁˆÈŠOG‚ç‚È‚¢‚ÅAÄ¶‡‚ÍMOVIEORDER‚Å“ü‚ê‘Ö‚¦‚é
-	MOVFILEPATH[0] = SysAllocString(L"../mov/v30.avi");
+	MOVFILEPATH[0] = SysAllocString(L"../mov/cookie.avi");
 	MOVFILEPATH[1] = SysAllocString(L"../mov/Wildlife.wmv");
 	MOVFILEPATH[2] = SysAllocString(L"../mov/cookie.avi");
 	//MOVFILEPATH[3] = SysAllocString(L"");
@@ -232,6 +244,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 
 		if (isDispose) {
+			//•Ï‚¦‚é
+
 
 			//Œv‘ª‚ÌI—¹Afile‚ğŠJ‚«’¼‚µ‚ÄŒv‘ªƒXƒ^[ƒg
 			tet.EndListening();
@@ -286,11 +300,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		//Ä¶’†‚Ì‹[—“I‚ÈDelay‚ğs‚¤
 		//
-		if (Delay[unit][0] < mov.GetCurrentPosition()) {
+		if (delayProgram[0][unit] < mov.GetCurrentPosition()) {
 				
 				tet.Setparam_s1("Delay");
 				mov.StopMovie();
-				Sleep(500);
+				Sleep(delayProgram[1][unit]);
 				mov.StartMovie();
 				tet.Setparam_s1("ReStart");
 				unit = unit+1;
@@ -323,7 +337,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		//CTRLƒL[‚ª‰Ÿ‚³‚ê‚½‚çCMovieİ’è•Ä¶ŠJn
 		if (wParam == VK_CONTROL) {
-
 			mov.SetMovieScreen();
 
 			tet.Setparam_d3(mov.GetCurrentPosition());

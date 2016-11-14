@@ -1,0 +1,6 @@
+movID=1,movcount=0
+17:16:27.92
+movID=2,movcount=1
+17:16:28.338
+movID=0,movcount=2
+17:16:33.401
