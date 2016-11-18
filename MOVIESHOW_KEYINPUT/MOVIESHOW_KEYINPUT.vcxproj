@@ -44,7 +44,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\boost_1_61_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\boost_1_61_0\libs;C:\boost_1_61_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\boost_1_61_0\stage\x86\lib;C:\boost_1_61_0\stage\x64\lib;C:\boost_1_61_0\libs;C:\boost_1_61_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -71,22 +71,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi.cpp" />
-    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_parser.cpp" />
-    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_socket.cpp" />
-    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\msexp_eyetribe.cpp" />
-    <ClCompile Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\msexp_misc.cpp" />
+    <ClCompile Include="gazeapi.cpp" />
+    <ClCompile Include="gazeapi_parser.cpp" />
+    <ClCompile Include="gazeapi_socket.cpp" />
+    <ClCompile Include="msexp_eyetribe.cpp" />
+    <ClCompile Include="msexp_misc.cpp" />
     <ClCompile Include="ms_exp_showmovie.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi.h" />
-    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_interfaces.h" />
-    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_observable.hpp" />
-    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_parser.hpp" />
-    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_socket.hpp" />
-    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\gazeapi_types.h" />
-    <ClInclude Include="..\..\MOV_KEY_EYETRIBE\MOV_KEY_EYETRIBE\msexp_eyetribe.hpp" />
+    <ClInclude Include="gazeapi.h" />
+    <ClInclude Include="gazeapi_interfaces.h" />
+    <ClInclude Include="gazeapi_observable.hpp" />
+    <ClInclude Include="gazeapi_parser.hpp" />
+    <ClInclude Include="gazeapi_socket.hpp" />
+    <ClInclude Include="gazeapi_types.h" />
+    <ClInclude Include="msexp_eyetribe.hpp" />
     <ClInclude Include="msexp_misc.hpp" />
     <ClInclude Include="ms_exp_showmovie.hpp" />
   </ItemGroup>
