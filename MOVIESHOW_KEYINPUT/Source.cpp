@@ -11,6 +11,7 @@
 #include <string>
 #include <random>
 #include <algorithm>
+#include <ctime>
 using namespace std;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -30,7 +31,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 //遅延回数
 #define     DELAYCOUNT     5
 
-#define		DELAYTIME   200.0
+#define		DELAYTIME   500.0
 
 
 
@@ -52,21 +53,27 @@ bool			isPause;		//今止まってますか！？？？？
 bool			isPlay;			//いま再生してますか
 BSTR			MOVFILEPATH[MOVIENUM];//動画の場所
 
-int unit;
+int unit, cnt, cnt2;
 DOUBLE tempN;
 bool flugC;
 
-int cnt, cnt2;
 
 
-DOUBLE		delayTiming[DELAYCOUNT] = {0,0,0,0,0};
 
+//動画ごとET記録ファイル命名規則
+std::string exID = "test1";
+//遅延長さの動画ごとの設定
+DOUBLE		delayLength[MOVIENUM] = { 500.0,500.0,800.0 };
 
+//ある動画中でどのタイミングでどういう長さの遅延が起こるかを定義したもの
+//今入っているのは初期化
+//動画が切り替わるたびに、1行目をRondomdelay()で、2行目をDelaytimeset()で切り替えていく
 DOUBLE		delayProgram[2][DELAYCOUNT+1] = {	{0.5	  ,1.0      ,1.5	  ,2.0		,2.5	  ,100.0 },
 										{DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,999.9 }};//遅延のスクリプト
 
+DOUBLE		delayTiming[DELAYCOUNT] = { 0,0,0,0,0 };
+
 std::string movname_a;
-std::string exID = "test1" + std::to_string(timenow.wMinute);//動画ごとの愛と落下記録ファイル命名規則
 
 //動画再生の順番設定
 //FILEPATHは動画ごとの通し番号、MOVIEORDERは順番を示す。
@@ -77,11 +84,11 @@ int	MOVIEORDER[MOVIENUM] = { 1,2,0 };
 MSEXP::ShowMov	mov;//例の追加ヘッダ
 MSEXP::EYETRIBE tet;//アイトライブ
 
-
 //乱数
 std::random_device rnd;
 std::mt19937 mt(rnd());
-std::uniform_int_distribution<> rand29(1, 20);//乱数の範囲ここで決まってます
+std::uniform_int_distribution<> rand29(1, 59);//乱数の範囲ここで決まってます
+
 void RandomDelay() {
 
 	for (cnt = 0; cnt < DELAYCOUNT; cnt++) {
@@ -104,7 +111,6 @@ void RandomDelay() {
 	
 }
 
-
 //ここからメイン文が走る
 int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow) {
 	MSG			msg;
@@ -124,6 +130,16 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	isPause = false;
 	isPlay = false;
 
+	//ファイル名名
+	struct tm now;
+	time_t longtime;
+	char timestr[32];
+
+	longtime = time(NULL);
+	localtime_s(&now, &longtime);
+	asctime_s(timestr, sizeof(timestr), &now);
+	exID = "test11";
+
 	
 	//ランダム
 	//Delayタイミングの作成
@@ -131,9 +147,9 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	RandomDelay();
 
 	//動画ソース管理。基本的には動画追加時以外触らないで、再生順はMOVIEORDERで入れ替える
-	MOVFILEPATH[0] = SysAllocString(L"../mov/cookie.avi");
+	MOVFILEPATH[0] = SysAllocString(L"../mov/Wildlife.wmv");
 	MOVFILEPATH[1] = SysAllocString(L"../mov/Wildlife.wmv");
-	MOVFILEPATH[2] = SysAllocString(L"../mov/cookie.avi");
+	MOVFILEPATH[2] = SysAllocString(L"../mov/Wildlife.wmv");
 	//MOVFILEPATH[3] = SysAllocString(L"");
 	//MOVFILEPATH[4] = SysAllocString(L"");
 	//MOVFILEPATH[5] = SysAllocString(L"");
@@ -245,9 +261,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		if (isDispose) {
 			//変える
-
-
+			RandomDelay();
 			//計測の終了、fileを開き直して計測スタート
+			tet.Setparam_s1("Dispose");
 			tet.EndListening();
 			Sleep(1000);
 			unit = 0;
@@ -268,6 +284,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			//akisamo
 			//背景に画像を表示したい
+			
 			hdcBmp = BeginPaint(hwnd, &ps);
 			hbmp = (HBITMAP)LoadImage(NULL, "graystart.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 			hMdc = CreateCompatibleDC(hdcBmp);
@@ -284,7 +301,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_TIMER:
 
-
 		tet.Setparam_d1(mov.GetCurrentPosition());
 		//もし再生していなかったら(再生終了していたら)
 		//動画画面を閉じる処理を行う
@@ -294,24 +310,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				InvalidateRect(hwnd, NULL, TRUE);
 				isDispose = true;
 				isPlay = false;
+				tet.Setparam_s1("Dispose");
 			}
-		}
-
-
 		//再生中の擬似的なDelayを行う
-		//
-		if (delayProgram[0][unit] < mov.GetCurrentPosition()) {
-				
-				tet.Setparam_s1("Delay");
+		} else if (delayProgram[0][unit] < mov.GetCurrentPosition()) {	
+				tet.Setparam_s1("Delay"+ std::to_string(unit));
 				mov.StopMovie();
 				Sleep(delayProgram[1][unit]);
 				mov.StartMovie();
 				tet.Setparam_s1("ReStart");
 				unit = unit+1;
 					}
-		
-
-
 		break;
 
 	case WM_KEYDOWN:
@@ -355,8 +364,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			//実質WndProcの引数のhwndでも同じもので，どちらを指定しても大丈夫。なはず。
 			mov.SetWindowHandle(thewnd);
 
-
-
 			//押下時点の時間を記録する
 			GetLocalTime(&timenow);
 			//char tmpStr[100];
@@ -389,25 +396,27 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			isPlay = true;
 		}
 
-
-		if (wParam == VK_SPACE) {
+		if (wParam == VK_SHIFT) {
 			//スペースキーが押されたら，一時停止orリスタート
 			if (isPlay) {
 				if (!isPause) {
-					tet.Setparam_s1("KEY PRESSED");
+					tet.Setparam_s1("KeyPause");
 					mov.StopMovie();
 					isPause = true;
 				}
 				else {
 					mov.StartMovie();
 					isPause = false;
-
 				}
 			}
-			else {
-			}
 		}
+
+		if (wParam == VK_SPACE) {
+			tet.Setparam_s3("Clicked");
+		}
+
 		break;
+
 
 	case WM_CREATE:
 		break;

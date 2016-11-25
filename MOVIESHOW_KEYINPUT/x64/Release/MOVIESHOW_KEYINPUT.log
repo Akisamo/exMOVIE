@@ -1,0 +1,14 @@
+﻿  Source.cpp
+Source.cpp(173): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+Source.cpp(174): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+Source.cpp(202): warning C4302: '型キャスト': 'LPSTR' から 'WORD' へ切り詰めます。
+Source.cpp(207): warning C4302: '型キャスト': 'LPSTR' から 'WORD' へ切り詰めます。
+Source.cpp(282): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+Source.cpp(320): warning C4244: '引数': 'DOUBLE' から 'DWORD' への変換です。データが失われる可能性があります。
+Source.cpp(254): warning C4101: 'br': ローカル変数は 1 度も使われていません。
+  コード生成しています。
+  9 of 3698 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    3 functions were new in current compilation
+    40 functions had inline decision re-evaluated but remain unchanged
+  コード生成が終了しました。
+  MOVIESHOW_KEYINPUT.vcxproj -> C:\Users\A_Kawauchi\Documents\github\exMOVIE\exMOVIE\x64\Release\MOVIESHOW_KEYINPUT.exe
