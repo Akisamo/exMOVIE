@@ -1,6 +1,0 @@
-movID=1,movcount=0
-15:47:04.500
-movID=2,movcount=1
-15:47:39.48
-movID=0,movcount=2
-15:48:13.671
