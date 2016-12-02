@@ -56,7 +56,7 @@ void MSEXP::EYETRIBE::StartListening(std::string FileName){
 
 	this->GoOnREC = true;//フラグセット
 
-	resultfile = FileName + ".csv";//結果ファイルの名称
+	resultfile ="./data/" + FileName + ".csv";//結果ファイルの名称
 
 	std::cout << "\n....Preparing....\n";
 	//std::cout << "==This program will track your eyes until \n Q (case sensitive) has been pressed.\n";

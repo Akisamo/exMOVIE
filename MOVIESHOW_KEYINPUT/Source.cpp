@@ -25,11 +25,11 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 //背景色とか，そんなもののDeclare
 #define		BGMAIN	RGB(127,127,127)
 
-//動画数
+//1回の実験で流す動画数
 #define		MOVIENUM	7
 
 //遅延回数
-#define     DELAYCOUNT     5
+#define     DELAYCOUNT     1
 
 #define		DELAYTIME   5000.0
 
@@ -58,26 +58,27 @@ DOUBLE tempN;
 bool flugC;
 
 
-
-
 //動画ごとET記録ファイル命名規則
-std::string exID = "test2";
+std::string st;
+SYSTEMTIME tm;
+char timestr[20];
+std::string exID = "user01";
 
 //ある動画中でどのタイミングでどういう長さの遅延が起こるかを定義したもの
 //今入っているのは初期化
 //動画が切り替わるたびに、1行目をRondomdelay()で、2行目をDelaytimeset()で切り替えていく
-DOUBLE		delayProgram[2][DELAYCOUNT+1] = {	{0.5 ,1.0 ,1.5 ,2.0	,2.5 ,100.0 },
-										{DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,999.9 }};//遅延のスクリプト
+DOUBLE		delayProgram[2][DELAYCOUNT+1] = {	{0.5 ,/*1.0 ,1.5 ,2.0	,2.5,*/ 100.0 },
+										{DELAYTIME,/*DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,*/999.9 }};//遅延のスクリプト
 
-DOUBLE		delayTiming[DELAYCOUNT] = { 0,0,0,0,0 };
-DOUBLE		delayLength[7] = { 0,0,200,500,1000,2000,5000, };
+DOUBLE		delayTiming[DELAYCOUNT];
+DOUBLE		delayLength[7] = {0,0,0,500,1000,2000,5000,};
 
 std::string movname_a;
 
 //動画再生の順番設定
 //FILEPATHは動画ごとの通し番号、MOVIEORDERは順番を示す。
 //MOVIEORDER[2]=7は、2番めにMOVFILEPATH[7]を再生せよということ
-int	MOVIEORDER[MOVIENUM] = { 0,0,0,0,0,0,0,};
+int	MOVIEORDER[MOVIENUM] = { 2,3,4,2,3,4,2};
 
 ////インスタンス作成
 MSEXP::ShowMov	mov;//例の追加ヘッダ
@@ -86,7 +87,7 @@ MSEXP::EYETRIBE tet;//アイトライブ
 //乱数
 std::random_device rnd;
 std::mt19937 mt(rnd());
-std::uniform_int_distribution<> rand29(1, 59);//乱数の範囲ここで決まってます
+std::uniform_int_distribution<> rand29(4, 16);//乱数の範囲ここで決まってます。2~8秒
 
 void RandomDelay() {
 
@@ -146,6 +147,11 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	isPause = false;
 	isPlay = false;
 
+	for (int i; i < DELAYCOUNT; i++) { delayTiming[i] = 0.0; }
+
+	GetSystemTime(&tm);
+	sprintf_s(timestr, "%02d%02d_%02d%02d_",tm.wMonth,tm.wDay,(tm.wHour+9)%24,tm.wMinute);
+
 	//遅延帳並び替え
 	ShuffleDelayLength(delayLength, 7);
 	//ランダム
@@ -166,9 +172,9 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	//動画ソース管理。基本的には動画追加時以外触らないで、再生順はMOVIEORDERで入れ替える
 	MOVFILEPATH[0] = SysAllocString(L"../mov/Wildlife.wmv");
 	MOVFILEPATH[1] = SysAllocString(L"../mov/cookie.avi");
-	//MOVFILEPATH[2] = SysAllocString(L"../mov/cookie.avi");
-	//MOVFILEPATH[3] = SysAllocString(L"../mov/cookie.avi");
-	//MOVFILEPATH[4] = SysAllocString(L"../mov/Wildlife.wmv");
+	MOVFILEPATH[2] = SysAllocString(L"../mov/ParkScene_1920x1080_24.wmv");
+	MOVFILEPATH[3] = SysAllocString(L"../mov/Kimono1_1920x1080_24.wmv");
+	MOVFILEPATH[4] = SysAllocString(L"../mov/BQTerrace_1920x1080_60.wmv");
 	//MOVFILEPATH[5] = SysAllocString(L"../mov/Wildlife.wmv");
 	//MOVFILEPATH[6] = SysAllocString(L"../mov/Wildlife.wmv");
 	//MOVFILEPATH[7] = SysAllocString(L"");
@@ -198,7 +204,7 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	//akisamo
 	//タイムスタンプfileの出力
 	char filename[100];
-	sprintf_s(filename, "sec-%d_mov%d.txt", movcount, MOVIEORDER[movcount]);
+	sprintf_s(filename,  "./data/%s_%s.txt"  , exID, std::string(timestr));
 
 	err = fopen_s(&fp, filename, "w");
 	if (err == 0) {//開けなかったら
@@ -374,7 +380,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			mov.SelectFile(MOVFILEPATH[(MOVIEORDER[movcount])]);
 
 			//アイトラッカの記録開始(終了は動画終了時orESC押下時)
-			movname_a = exID + "_" + std::to_string(movcount);
+			movname_a = exID + "_" + std::string(timestr) + std::to_string(movcount);
 			//この名前で記録開始せよ
 			tet.StartListening(movname_a);
 			tet.Setparam_i1(0);
