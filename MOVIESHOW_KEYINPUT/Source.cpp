@@ -17,7 +17,7 @@ using namespace std;
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //デバッグフラグ これがONだと75％の大きさで窓作成
-#define		DEBUGMODE	false
+#define		DEBUGMODE	true
 
 //WindowClass名の設定
 #define		classNAME	_T("MYWINDOWDDD")
@@ -26,7 +26,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 #define		BGMAIN	RGB(127,127,127)
 
 //1回の実験で流す動画数
-#define		MOVIENUM	7
+#define		MOVIENUM	8
 
 //遅延回数
 #define     DELAYCOUNT     1
@@ -62,7 +62,7 @@ bool flugC;
 std::string st;
 SYSTEMTIME tm;
 char timestr[20];
-std::string exID = "user01";
+std::string exID = "test";
 
 //ある動画中でどのタイミングでどういう長さの遅延が起こるかを定義したもの
 //今入っているのは初期化
@@ -78,8 +78,9 @@ std::string movname_a;
 //動画再生の順番設定
 //FILEPATHは動画ごとの通し番号、MOVIEORDERは順番を示す。
 //MOVIEORDER[2]=7は、2番めにMOVFILEPATH[7]を再生せよということ
-//int	MOVIEORDER[MOVIENUM] = { 5,5,5,5,5,5,5};
-int	MOVIEORDER[MOVIENUM] = { 6,6,6,6,6,6,6};
+int	MOVIEORDER[MOVIENUM] = { 4,4,4,4,4,4,4};
+//int	MOVIEORDER[MOVIENUM] = { 6,6,6,6,6,6,6};
+int excount = 1;
 
 
 ////インスタンス作成
@@ -163,11 +164,10 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	//ファイル名
 	struct tm now;
 	time_t longtime;
-	char timestr[32];
-
-	longtime = time(NULL);
-	localtime_s(&now, &longtime);
-	asctime_s(timestr, sizeof(timestr), &now);
+	//char timestr[32];
+		//longtime = time(NULL);
+	//localtime_s(&now, &longtime);
+	//asctime_s(timestr, sizeof(timestr), &now);
 	
 
 
@@ -177,9 +177,9 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	MOVFILEPATH[2] = SysAllocString(L"../mov/fix_kmn20m.wmv");
 	MOVFILEPATH[3] = SysAllocString(L"../mov/fix_ten20m.wmv");
 	MOVFILEPATH[4] = SysAllocString(L"../mov/fix_ter20m.wmv");
-	MOVFILEPATH[5] = SysAllocString(L"../mov/fix_kim_mini.wmv");
-	MOVFILEPATH[6] = SysAllocString(L"../mov/fix_ter_mini.wmv");
-	//MOVFILEPATH[7] = SysAllocString(L"");
+	//MOVFILEPATH[6] = SysAllocString(L"../mov/");
+	//MOVFILEPATH[5] = SysAllocString(L"../mov/");
+	//MOVFILEPATH[7] = SysAllocString(L"../mov/");
 	//MOVFILEPATH[8] = SysAllocString(L"");
 	//MOVFILEPATH[9] = SysAllocString(L"");
 
@@ -206,7 +206,7 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	//akisamo
 	//タイムスタンプfileの出力
 	char filename[100];
-	sprintf_s(filename,  "./data/%s_%s.txt"  , exID, std::string(timestr));
+	sprintf_s(filename,  "./data/%s_%s.txt"  , exID, std::string( timestr, 9));
 
 	err = fopen_s(&fp, filename, "w");
 	if (err == 0) {//開けなかったら
@@ -388,7 +388,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			mov.SelectFile(MOVFILEPATH[(MOVIEORDER[movcount])]);
 
 			//アイトラッカの記録開始(終了は動画終了時orESC押下時)
-			movname_a = exID + "_" + std::string(timestr) + std::to_string(movcount);
+			movname_a = exID + "_" + std::string(timestr) + std::to_string(movcount)+ std::to_string(delayProgram[1][unit]);
 			//この名前で記録開始せよ
 			tet.StartListening(movname_a);
 			tet.Setparam_i1(0);
