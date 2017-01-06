@@ -17,28 +17,27 @@ using namespace std;
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //デバッグフラグ これがONだと75％の大きさで窓作成
-#define		DEBUGMODE	true
+#define		DEBUGMODE	false
 
 //WindowClass名の設定
 #define		classNAME	_T("MYWINDOWDDD")
-
 //背景色とか，そんなもののDeclare
 #define		BGMAIN	RGB(127,127,127)
-
-//1回の実験で流す動画数
-#define		MOVIENUM	8
-
-//遅延回数
+//実験のくりかえし数
+#define		MOVIENUM	7
+//動画ソースの格納スペース
+#define		MOVIESOURCENUM 8
+//ATKカウント
 #define     DELAYCOUNT     1
-
-#define		DELAYTIME   5000.0
-
-
+//初期化適当な値
+#define		INITIALIZED   5000.0
+//MovShotcut
+#define		MOVS 5
 
 
 
 //画面全体を隠すWindowの作成と，キー入力などによるInteractionの実装
-//基本方針としては，Windowsの窓周り関数をそのまま利用
+//基本方針としては，Windowsの窓周り関数をそのまま利用F
 //InterationもOSに依存する
 // HINSTANCEやら HWNDやらは，とりあえずおまじないと言うことでw
 
@@ -51,37 +50,35 @@ bool			flgStop;
 bool			isDispose;		//動画終了初回のみ通る処理用フラグ。再生時はTrueに戻す。再生終了の処理が終わったらFalseに切り替える
 bool			isPause;		//今止まってますか！？？？？
 bool			isPlay;			//いま再生してますか
-BSTR			MOVFILEPATH[MOVIENUM];//動画の場所
+BSTR			MOVFILEPATH[MOVIESOURCENUM];//動画の場所
 
 int unit, cnt, cnt2;
 DOUBLE tempN;
 bool flugC;
 
-
 //動画ごとET記録ファイル命名規則
 std::string st;
 SYSTEMTIME tm;
 char timestr[20];
-std::string exID = "test";
+std::string exID = "sub02";
 
 //ある動画中でどのタイミングでどういう長さの遅延が起こるかを定義したもの
 //今入っているのは初期化
 //動画が切り替わるたびに、1行目をRondomdelay()で、2行目をDelaytimeset()で切り替えていく
-DOUBLE		delayProgram[2][DELAYCOUNT+1] = {	{6 ,/*1.0 ,1.5 ,2.0	,2.5,*/ 100.0 },
-										{DELAYTIME,/*DELAYTIME,DELAYTIME,DELAYTIME,DELAYTIME,*/999.9 }};//遅延のスクリプト
+DOUBLE		delayProgram[2][DELAYCOUNT+1] = {	{6 ,/*1.0, 1.5 ,2.0	,2.5,*/ 100.0 },
+										{ INITIALIZED,/*INITIALIZED,INITIALIZED,INITIALIZED,INITIALIZED,*/999.9 }};//遅延のスクリプト
 
 DOUBLE		delayTiming[DELAYCOUNT];
 DOUBLE		delayLength[7] = {0,0,0,500,1000,2000,5000};
+//DOUBLE		delayLength[7] = { 0,0,0,0,0,0,0 };
 
 std::string movname_a;
 
 //動画再生の順番設定
 //FILEPATHは動画ごとの通し番号、MOVIEORDERは順番を示す。
 //MOVIEORDER[2]=7は、2番めにMOVFILEPATH[7]を再生せよということ
-int	MOVIEORDER[MOVIENUM] = { 4,4,4,4,4,4,4};
-//int	MOVIEORDER[MOVIENUM] = { 6,6,6,6,6,6,6};
+int	MOVIEORDER[MOVIENUM] = { MOVS,MOVS,MOVS,MOVS,MOVS,MOVS,MOVS};
 int excount = 1;
-
 
 ////インスタンス作成
 MSEXP::ShowMov	mov;//例の追加ヘッダ
@@ -90,7 +87,7 @@ MSEXP::EYETRIBE tet;//アイトライブ
 //乱数
 std::random_device rnd;
 std::mt19937 mt(rnd());
-std::uniform_int_distribution<> rand29(14, 26);//乱数の範囲ここで決まってます。2~8秒
+std::uniform_int_distribution<> rand29(20, 40);//乱数の範囲ここで決まってます。動画開始から5~15秒
 
 void RandomDelay() {
 
@@ -177,9 +174,9 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE pinst, LPSTR cmdline, int cmdshnow
 	MOVFILEPATH[2] = SysAllocString(L"../mov/fix_kmn20m.wmv");
 	MOVFILEPATH[3] = SysAllocString(L"../mov/fix_ten20m.wmv");
 	MOVFILEPATH[4] = SysAllocString(L"../mov/fix_ter20m.wmv");
-	//MOVFILEPATH[6] = SysAllocString(L"../mov/");
-	//MOVFILEPATH[5] = SysAllocString(L"../mov/");
-	//MOVFILEPATH[7] = SysAllocString(L"../mov/");
+	MOVFILEPATH[5] = SysAllocString(L"../mov/30_itorinos20m.wmv");
+	MOVFILEPATH[6] = SysAllocString(L"../mov/30_kimono20m.wmv");
+	MOVFILEPATH[7] = SysAllocString(L"../mov/30_terras20m.wmv");
 	//MOVFILEPATH[8] = SysAllocString(L"");
 	//MOVFILEPATH[9] = SysAllocString(L"");
 
@@ -329,7 +326,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 		//再生中の擬似的なDelayを行う
 		} else if (delayProgram[0][unit] < mov.GetCurrentPosition()) {	
-				tet.Setparam_s1("Delay_"+ std::to_string(delayProgram[0][unit]));
+				tet.Setparam_s1("Delay_"+ std::to_string(delayProgram[0][0]));
 				tet.Setparam_i3(6);
 				tet.Setparam_d2(delayProgram[1][unit]);
 				mov.StopMovie();
@@ -388,7 +385,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			mov.SelectFile(MOVFILEPATH[(MOVIEORDER[movcount])]);
 
 			//アイトラッカの記録開始(終了は動画終了時orESC押下時)
-			movname_a = exID + "_" + std::string(timestr) + std::to_string(movcount)+ std::to_string(delayProgram[1][unit]);
+			movname_a = exID + "_" + std::string(timestr) + std::to_string(movcount)+ "_" + std::to_string(delayProgram[1][unit]);
 			//この名前で記録開始せよ
 			tet.StartListening(movname_a);
 			tet.Setparam_i1(0);

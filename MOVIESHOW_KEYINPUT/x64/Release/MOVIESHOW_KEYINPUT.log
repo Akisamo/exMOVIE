@@ -1,20 +1,21 @@
 ﻿  Source.cpp
-Source.cpp(198): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
-Source.cpp(199): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
-Source.cpp(227): warning C4302: '型キャスト': 'LPSTR' から 'WORD' へ切り詰めます。
-Source.cpp(232): warning C4302: '型キャスト': 'LPSTR' から 'WORD' へ切り詰めます。
-Source.cpp(209): warning C4477: 'sprintf_s' : 書式文字列 '%s' には、型 'char *' の引数が必要ですが、可変個引数 1 は型 'std::string' です
-Source.cpp(209): warning C4477: 'sprintf_s' : 書式文字列 '%s' には、型 'char *' の引数が必要ですが、可変個引数 2 は型 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' です
-Source.cpp(165): warning C4101: 'now': ローカル変数は 1 度も使われていません。
-Source.cpp(166): warning C4101: 'longtime': ローカル変数は 1 度も使われていません。
-Source.cpp(336): warning C4244: '引数': 'DOUBLE' から 'DWORD' への変換です。データが失われる可能性があります。
-Source.cpp(277): warning C4101: 'hbmp': ローカル変数は 1 度も使われていません。
-Source.cpp(275): warning C4101: 'hdcBmp': ローカル変数は 1 度も使われていません。
-Source.cpp(279): warning C4101: 'br': ローカル変数は 1 度も使われていません。
-Source.cpp(275): warning C4101: 'hMdc': ローカル変数は 1 度も使われていません。
+Source.cpp(195): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+Source.cpp(196): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+Source.cpp(224): warning C4302: '型キャスト': 'LPSTR' から 'WORD' へ切り詰めます。
+Source.cpp(229): warning C4302: '型キャスト': 'LPSTR' から 'WORD' へ切り詰めます。
+Source.cpp(206): warning C4477: 'sprintf_s' : 書式文字列 '%s' には、型 'char *' の引数が必要ですが、可変個引数 1 は型 'std::string' です
+Source.cpp(206): warning C4477: 'sprintf_s' : 書式文字列 '%s' には、型 'char *' の引数が必要ですが、可変個引数 2 は型 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' です
+Source.cpp(162): warning C4101: 'now': ローカル変数は 1 度も使われていません。
+Source.cpp(163): warning C4101: 'longtime': ローカル変数は 1 度も使われていません。
+Source.cpp(333): warning C4244: '引数': 'DOUBLE' から 'DWORD' への変換です。データが失われる可能性があります。
+Source.cpp(274): warning C4101: 'hbmp': ローカル変数は 1 度も使われていません。
+Source.cpp(272): warning C4101: 'hdcBmp': ローカル変数は 1 度も使われていません。
+Source.cpp(276): warning C4101: 'br': ローカル変数は 1 度も使われていません。
+Source.cpp(272): warning C4101: 'hMdc': ローカル変数は 1 度も使われていません。
   コード生成しています。
-  1 of 3711 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+  99 of 3662 functions ( 2.7%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    2 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
-  MOVIESHOW_KEYINPUT.vcxproj -> C:\Users\A_Kawauchi\Documents\github\exMOVIE\exMOVIE\x64\Release\MOVIESHOW_KEYINPUT.exe
+  MOVIESHOW_KEYINPUT.vcxproj -> C:\Users\kawauchi\Documents\GitHub\exMOVIE\x64\Release\MOVIESHOW_KEYINPUT.exe
+  MOVIESHOW_KEYINPUT.vcxproj -> C:\Users\kawauchi\Documents\GitHub\exMOVIE\x64\Release\MOVIESHOW_KEYINPUT.pdb (Full PDB)
